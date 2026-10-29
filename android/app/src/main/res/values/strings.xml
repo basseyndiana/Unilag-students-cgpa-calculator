@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">UNILAG CGPA Calculator</string>
+    <string name="title_activity_main">UNILAG CGPA Calculator</string>
+    <string name="package_name">com.unilag.cgpacalculator</string>
+    <string name="custom_url_scheme">com.unilag.cgpacalculator</string>
+</resources>
