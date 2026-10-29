@@ -3,9 +3,12 @@ name: Build Android APK
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    tags:
+      - 'v*'
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -47,9 +50,35 @@ jobs:
           cd android
           ./gradlew assembleDebug
 
-      - name: Upload Debug APK Artifact
+      - name: Prepare APK For Distribution
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk ./UNILAG-CGPA-Calculator.apk
+
+      - name: Upload APK as Workflow Artifact
         uses: actions/upload-artifact@v4
         with:
           name: UNILAG-CGPA-Calculator-Debug-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 14
+          path: ./UNILAG-CGPA-Calculator.apk
+          retention-days: 30
+
+      - name: Publish Public Release with Direct Download Link
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
+        with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'latest' }}
+          name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || 'Latest Android Build' }}
+          body: |
+            ### UNILAG CGPA Calculator — Android App 🎓📱
+
+            Tap below to download the application directly to your Android device:
+            - **[Download UNILAG CGPA Calculator APK](https://github.com/${{ github.repository }}/releases/latest/download/UNILAG-CGPA-Calculator.apk)**
+
+            ---
+            #### Installation Instructions:
+            1. Tap the direct download link on your phone.
+            2. When the download completes, tap the file in your notification bar or Downloads folder.
+            3. If Android displays *"For your security, your phone is not allowed to install unknown apps from this source"*, tap **Settings** and turn on **Allow from this source**.
+            4. Tap **Install** and enjoy tracking your CGPA on mobile!
+          files: ./UNILAG-CGPA-Calculator.apk
+          prerelease: false
+          draft: false
